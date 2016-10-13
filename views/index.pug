@@ -4,7 +4,7 @@ block content
   div(class="container")
     div(class="row")
       div(class="twelve columns")
-        h1 Translate using Yandex
+        h1 Translate using Yandex 
 
     form(method="post" action="/translate")
       div(class="row")
@@ -13,14 +13,16 @@ block content
             option(value="FR") French
             option(value="EN") English
             option(value="ES") Spanish
+
         div(class="six columns")
           select(name="to" class="u-full-width")
             option(value="FR") French
             option(value="EN") English
             option(value="ES") Spanish
+            
       div(class="row")
         div(class="twelve columns")
-          textarea(placeholder="Enter text to translate" class="u-full-width")
+          textarea(placeholder="Enter text to translate" class="u-full-width" name="textToTranslate")
 
       div(class="row")
         div(class="twelve columns")
