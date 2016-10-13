@@ -1,4 +1,4 @@
-This application uses the Yandex API to convert strings between French, English and Spanish.
+This application uses the Yandex API (https://tech.yandex.com/translate/doc/dg/reference/getLangs-docpage/#JSON) to convert strings between French, English and Spanish.
 
 Stack:
 
