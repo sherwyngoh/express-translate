@@ -29,8 +29,13 @@ router.post('/', function(req, res, next) {
   };
 
   function callback(err, response, body) {
-    var translatedText = JSON.parse(body).text
-    res.send({text: translatedText[0]});
+    var r = JSON.parse(body)
+    if (r.code == 200){
+      var translatedText = r.text
+      res.send({text: translatedText[0]});
+    } else {
+      res.send("Error: (" + r.code + ") " + r.message)
+    }
   };
 
   request.post(options, callback);
