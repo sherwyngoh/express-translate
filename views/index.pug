@@ -1,5 +1,27 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  div(class="container")
+    div(class="row")
+      div(class="twelve columns")
+        h1 Translate using Yandex
+
+    form(method="post" action="/translate")
+      div(class="row")
+        div(class="six columns")
+          select(name="from" class="u-full-width")
+            option(value="FR") French
+            option(value="EN") English
+            option(value="ES") Spanish
+        div(class="six columns")
+          select(name="to" class="u-full-width")
+            option(value="FR") French
+            option(value="EN") English
+            option(value="ES") Spanish
+      div(class="row")
+        div(class="twelve columns")
+          textarea(placeholder="Enter text to translate" class="u-full-width")
+
+      div(class="row")
+        div(class="twelve columns")
+          input(class="button-primary" type="submit" value="Submit")
