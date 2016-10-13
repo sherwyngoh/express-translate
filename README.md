@@ -7,6 +7,11 @@ Framework - express (4.13.4)
 Utilities
   - express-generator : application generator
   - config : secrets management
+    - usage:
+      `
+        var config = require("config");
+        apikey = config.get("YandexAPIkey")
+      `
 
 
 Getting started:
