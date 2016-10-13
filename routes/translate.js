@@ -23,7 +23,7 @@ router.post('/', function(req, res, next) {
     url: "https://translate.yandex.net/api/v1.5/tr.json/translate",
     form: {
       key: config.get("YandexAPIkey"),
-      text: req.body.textToTranslate,
+      text: req.body.text,
       lang: req.body.from + "-" + req.body.to
     }
   };
