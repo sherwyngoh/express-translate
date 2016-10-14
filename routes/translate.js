@@ -1,9 +1,9 @@
 var express     = require('express');
 var router      = express.Router();
 var config      = require('config');
+var dbURL       = config.get('mongoURL');
 var request     = require('request');
 var MongoClient = require('mongodb').MongoClient;
-var dbURL       = config.get('mongoURL');
 
 /* 
   Yandex Translate API Usage
@@ -24,10 +24,12 @@ router.post('/', function(req, res, next) {
   var text = req.body.text;
   var from = req.body.from;
   var to   = req.body.to;
+
   MongoClient.connect(dbURL, null, function(err, db) {
     var collection = db.collection(from + "-" + to);
     collection.findOne({[text]: {'$exists': 1}}, function(err, result){
-      if (err) { throw err }
+      if (err) { res.send({text: ''}) }
+
       if (result) {
         res.send({text: result[text][0]})
       } else {
@@ -40,7 +42,7 @@ router.post('/', function(req, res, next) {
           }
         };
 
-        request.post(options, function(err, response, body) {
+        function callback(err, response, body) {
           var r = JSON.parse(body)
           if (r.code == 200) {
             var translatedText = r.text;
@@ -49,7 +51,9 @@ router.post('/', function(req, res, next) {
           } else {
             res.send({text: ''});
           }
-        });
+        }
+
+        request.post(options, callback);
       }
     });
   });
