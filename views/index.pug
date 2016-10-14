@@ -1,28 +1,35 @@
 extends layout
 
 block content
+  script(src="javascripts/translate_handler.js")
   div(class="container")
     div(class="row")
       div(class="twelve columns")
         h1 Translate using Yandex 
 
-    form(method="post" action="/translate")
+    form(id="translate")
       div(class="row")
         div(class="six columns")
+          label From:
           select(name="from" class="u-full-width")
             option(value="EN") English
             option(value="FR") French
             option(value="ES") Spanish
 
         div(class="six columns")
+          label To:
           select(name="to" class="u-full-width")
             option(value="FR") French
             option(value="EN") English
             option(value="ES") Spanish
             
       div(class="row")
-        div(class="twelve columns")
+        div(class="six columns")
+          label Text to translate
           textarea(placeholder="Enter text to translate" class="u-full-width" name="text")
+        div(class="six columns")
+          label Translated Text
+          textarea(id="result" class="u-full-width" disabled)
 
       div(class="row")
         div(class="twelve columns")
