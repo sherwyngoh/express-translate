@@ -1,3 +1,4 @@
 {
-  "YandexAPIkey": "replaceme"
+  "YandexAPIkey": "replaceme",
+  "mongoURL": "mongodb://localhost:27017/express-translate"
 }

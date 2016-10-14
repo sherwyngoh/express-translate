@@ -1,7 +1,9 @@
-var express = require('express');
-var router  = express.Router();
-var config  = require('config');
-var request = require('request');
+var express     = require('express');
+var router      = express.Router();
+var config      = require('config');
+var request     = require('request');
+var MongoClient = require('mongodb').MongoClient;
+var dbURL       = config.get('mongoURL');
 
 /* 
   Yandex Translate API Usage
@@ -19,26 +21,38 @@ var request = require('request');
 */
 
 router.post('/', function(req, res, next) {
-  var options = {
-    url: "https://translate.yandex.net/api/v1.5/tr.json/translate",
-    form: {
-      key: config.get("YandexAPIkey"),
-      text: req.body.text,
-      lang: req.body.from + "-" + req.body.to
-    }
-  };
+  var text = req.body.text;
+  var from = req.body.from;
+  var to   = req.body.to;
+  MongoClient.connect(dbURL, null, function(err, db) {
+    var collection = db.collection(from + "-" + to);
+    collection.findOne({[text]: {'$exists': 1}}, function(err, result){
+      if (err) { throw err }
+      if (result) {
+        res.send({text: result[text][0]})
+      } else {
+        var options = {
+          url: "https://translate.yandex.net/api/v1.5/tr.json/translate",
+          form: {
+            key: config.get("YandexAPIkey"),
+            text: text,
+            lang: from + "-" + to
+          }
+        };
 
-  function callback(err, response, body) {
-    var r = JSON.parse(body)
-    if (r.code == 200){
-      var translatedText = r.text
-      res.send({text: translatedText[0]});
-    } else {
-      res.send("Error: (" + r.code + ") " + r.message)
-    }
-  };
-
-  request.post(options, callback);
+        request.post(options, function(err, response, body) {
+          var r = JSON.parse(body)
+          if (r.code == 200) {
+            var translatedText = r.text;
+            collection.insert({[text]: translatedText});
+            res.send({text: translatedText});
+          } else {
+            res.send({text: ''});
+          }
+        });
+      }
+    });
+  });
 });
 
 module.exports = router;
