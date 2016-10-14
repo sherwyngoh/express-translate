@@ -22,4 +22,6 @@ Getting started:
 4. Obtain a Yandex API key @ (www.yandex.com)
 5. `cp config/sample.json config/default.json`
 6. Set key in lieu of 'replaceme'
-7. npm start
+7. Install MongoDB for local database (https://www.mongodb.com/download-center?jmp=nav#community)
+8. `mkdir data && mongod --dbpath=./data --port 27017`
+9. nodemon to start server and watch for file changes
