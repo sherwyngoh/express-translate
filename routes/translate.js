@@ -20,10 +20,36 @@ var MongoClient = require('mongodb').MongoClient;
     & [callback=<name of the callback function>]
 */
 
+function queryYandexTranslateAPI(res, collection, from, to, text) {
+  var options = {
+    url: "https://translate.yandex.net/api/v1.5/tr.json/translate",
+    form: {
+      key: config.get("YandexAPIkey"),
+      text: text,
+      lang: from + "-" + to
+    }
+  }
+
+  function callback(err, response, body) {
+    var r = JSON.parse(body);
+    if (r.code == 200) {
+      var translatedText = r.text;
+      collection.insert({ [text]: translatedText });
+      res.send({ text: translatedText });
+    } else {
+      res.send({ text: '' });
+    }
+  }
+
+  request.post(options, callback);
+}
+
 router.post('/', function(req, res, next) {
   var text = req.body.text;
   var from = req.body.from;
   var to   = req.body.to;
+
+  if (from == to) { return res.send({ text: text }) }
 
   MongoClient.connect(dbURL, null, function(err, db) {
     var collection = db.collection(from + "-" + to);
@@ -33,27 +59,7 @@ router.post('/', function(req, res, next) {
       if (result) {
         res.send({text: result[text][0]})
       } else {
-        var options = {
-          url: "https://translate.yandex.net/api/v1.5/tr.json/translate",
-          form: {
-            key: config.get("YandexAPIkey"),
-            text: text,
-            lang: from + "-" + to
-          }
-        };
-
-        function callback(err, response, body) {
-          var r = JSON.parse(body)
-          if (r.code == 200) {
-            var translatedText = r.text;
-            collection.insert({[text]: translatedText});
-            res.send({text: translatedText});
-          } else {
-            res.send({text: ''});
-          }
-        }
-
-        request.post(options, callback);
+        queryYandexTranslateAPI(res, collection, from, to, text);
       }
     });
   });
