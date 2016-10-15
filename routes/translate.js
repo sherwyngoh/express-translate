@@ -49,14 +49,16 @@ function performLanguageDetection(res, from, to ,text) {
 
   function callback(err, response, body) {
     var r = JSON.parse(body);
-    if (r.code == 200) {
-      var lang = r.lang.toUpperCase();
+    if (r.code === 200) {
+      var lang = r.lang;
 
-      if (lang == to) {
+      if (lang.toUpperCase() === to.toUpperCase()) {
         res.send({ text: text });
       } else {
         checkIfExistsInDatabase(res, from, to, text);
       }
+    } else {
+      res.status(500).send("Lang Detect: Failed to communicate with Yandex server")
     }
   }
 
@@ -103,13 +105,14 @@ function queryYandexTranslateAPI(res, collection, from, to, text) {
 
   function callback(err, response, body) {
     var r = JSON.parse(body);
+    console.log(r)
 
     if (r.code == 200) {
       var translatedText = r.text;
       collection.insert({ [text]: translatedText });
       res.send({ text: translatedText });
     } else {
-      res.send({ text: '' });
+      res.status(500).send("Failed to communicate with Yandex server")
     }
   }
 
@@ -127,8 +130,8 @@ router.post('/', function(req, res, next) {
     performLanguageDetection(res, from, to, text);
     // if necessary, will then checkIfExistsInDatabase,
     // and then possibly queryYandexTranslateAPI.
-  } else { 
-    res.send({ text: text });
+  } else {
+    res.send({ text: '' });
   }
 
 });
