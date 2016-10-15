@@ -5,20 +5,24 @@ $(document).ready(function(){
     e.preventDefault();
     var resultEl     = $("#result")
     var url          = "/translate"
-    var formData     = $(e.target).serializeArray();
-    var dataToSubmit = {};
 
     resultEl.html("Translating...")
-
-    $.each(formData, function(index, val){
-      dataToSubmit[val.name] = val.value;
-    });
 
     function success(data) {
       resultEl.html(data.text)
     };
 
-    $.post(url, dataToSubmit, success)
+    function fail() {
+      $('#notice').html('Failed to get a response from the server');
+      $('#notice').fadeIn();
+      function hideNotice(){
+        $('#notice').fadeOut('fast');
+        resultEl.html("");
+      }
+      setTimeout(hideNotice, 3000);
+    }
+
+    $.post(url, $(e.target).serialize(), success).fail(fail)
 
   })
 })

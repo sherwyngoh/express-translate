@@ -1,3 +1,10 @@
 body {
   padding: 2rem 1rem;
 }
+
+#notice {
+  color: #33C3F0;
+  border: 2px solid #33C3F0;
+  padding: 1em;
+  display: none;
+}
