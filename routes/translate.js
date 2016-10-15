@@ -14,7 +14,7 @@ function checkParameters(from, to, text) {
   var params = [from, to, text];
 
   for (var i = 0; i < params.length; i++) {
-    valid  = valid && params[i].length > 0;
+    valid  = !!params[i] && params[i].length > 0;
   }
 
   valid = valid && (from != to);
@@ -128,7 +128,7 @@ router.post('/', function(req, res, next) {
     // if necessary, will then checkIfExistsInDatabase,
     // and then possibly queryYandexTranslateAPI.
   } else { 
-    return res.send({ text: text }) 
+    res.send({ text: text });
   }
 
 });
