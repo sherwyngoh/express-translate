@@ -6,10 +6,10 @@ describe('routes/index', function() {
   var defaultResponse = {text: ""}
 
   describe("GET /", function() {
-    it('should return default response', function(done) {
+    it('should return success', function(done) {
       supertest
           .get('/')
-          .expect(200) 
+          .expect(200)
           .expect('Content-Type', /text\/html/)
           .end(done);
     });
