@@ -1,12 +1,17 @@
 var express     = require('express');
 var router      = express.Router();
 var config      = require('config');
-var dbURL       = config.get('mongoURL');
 var request     = require('request');
 var MongoClient = require('mongodb').MongoClient;
 
+var dbURL        = config.get('mongoURL');
+var translateURL = config.get("yandexTranslateAPIURL");
+var detectURL    = config.get("yandexDetectAPIURL");
+var apikey       = config.get("yandexAPIkey");
+
+
 /* 
-  Yandex Translate API Usage
+  Yandex Detect API Usage
   POST:
     https://translate.yandex.net/api/v1.5/tr.json/translate?
   REQUIRED PARAMS:
@@ -20,11 +25,65 @@ var MongoClient = require('mongodb').MongoClient;
     & [callback=<name of the callback function>]
 */
 
+function performLanguageDetection(res, from, to ,text) {
+  var options = {
+    url: detectURL,
+    form: {
+      key: apikey,
+      text: text,
+      hint: 'en,fr,es'
+    }
+  }
+
+  function callback(err, response, body) {
+    var r = JSON.parse(body);
+    if (r.code == 200) {
+      var lang = r.lang.toUpperCase();
+
+      if (lang == to) {
+        res.send({ text: text });
+      } else {
+        checkIfExistsInDatabase(res, from, to, text);
+      }
+    }
+  }
+
+  request.post(options, callback);
+}
+
+function checkIfExistsInDatabase(res, from, to, text) {
+  MongoClient.connect(dbURL, null, function(err, db) {
+    var collection = db.collection(from + "-" + to);
+
+    collection.findOne({ [text]: { '$exists': 1 } }, function(err, result) {
+      if (err) { res.send({ text: '' }) }
+
+      if (result) {
+        res.send({ text: result[text][0] });
+      } else {
+        queryYandexTranslateAPI(res, collection, from, to, text);
+      }
+    });
+  });
+}
+
+/*
+  Yandex Translate API Usage
+  POST:
+    https://translate.yandex.net/api/v1.5/tr.json/translate?
+  REQUIRED PARAMS:
+    & key=<API key>
+    & text=<text to translate> -> "some text"
+  NON-REQUIRED PARAMS:
+    & [hint=<list of probably text language == en,de>]
+    & [callback=<function name>]
+*/
+
 function queryYandexTranslateAPI(res, collection, from, to, text) {
   var options = {
-    url: "https://translate.yandex.net/api/v1.5/tr.json/translate",
+    url: translateURL,
     form: {
-      key: config.get("YandexAPIkey"),
+      key: apikey,
       text: text,
       lang: from + "-" + to
     }
@@ -32,6 +91,7 @@ function queryYandexTranslateAPI(res, collection, from, to, text) {
 
   function callback(err, response, body) {
     var r = JSON.parse(body);
+
     if (r.code == 200) {
       var translatedText = r.text;
       collection.insert({ [text]: translatedText });
@@ -45,24 +105,15 @@ function queryYandexTranslateAPI(res, collection, from, to, text) {
 }
 
 router.post('/', function(req, res, next) {
-  var text = req.body.text;
-  var from = req.body.from;
-  var to   = req.body.to;
+  var text = req.body.text,
+      from = req.body.from,
+      to   = req.body.to;
 
   if (from == to) { return res.send({ text: text }) }
 
-  MongoClient.connect(dbURL, null, function(err, db) {
-    var collection = db.collection(from + "-" + to);
-    collection.findOne({[text]: {'$exists': 1}}, function(err, result){
-      if (err) { res.send({text: ''}) }
-
-      if (result) {
-        res.send({text: result[text][0]})
-      } else {
-        queryYandexTranslateAPI(res, collection, from, to, text);
-      }
-    });
-  });
+  performLanguageDetection(res, from, to, text);
+  // if necessary, will then checkIfExistsInDatabase,
+  // and then possibly queryYandexTranslateAPI.
 });
 
 module.exports = router;

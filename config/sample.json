@@ -1,4 +1,6 @@
 {
-  "YandexAPIkey": "replaceme",
-  "mongoURL": "mongodb://localhost:27017/express-translate"
+  "yandexAPIkey": "replaceme",
+  "yandexTranslateAPIURL": "https://translate.yandex.net/api/v1.5/tr.json/translate",
+  "yandexDetectAPIURL": "https://translate.yandex.net/api/v1.5/tr.json/detect",
+  "mongoURL": "mongodb://localhost:27017/express-translate",
 }
