@@ -9,6 +9,18 @@ var translateURL = config.get("yandexTranslateAPIURL");
 var detectURL    = config.get("yandexDetectAPIURL");
 var apikey       = config.get("yandexAPIkey");
 
+function checkParameters(from, to, text) {
+  var valid = true;
+  var params = [from, to, text];
+
+  for (var i = 0; i < params.length; i++) {
+    valid  = valid && params[i].length > 0;
+  }
+
+  valid = valid && (from != to);
+
+  return valid
+}
 
 /* 
   Yandex Detect API Usage
@@ -109,11 +121,16 @@ router.post('/', function(req, res, next) {
       from = req.body.from,
       to   = req.body.to;
 
-  if (from == to) { return res.send({ text: text }) }
+  var valid_params = checkParameters(from, to, text);
 
-  performLanguageDetection(res, from, to, text);
-  // if necessary, will then checkIfExistsInDatabase,
-  // and then possibly queryYandexTranslateAPI.
+  if (valid_params) {
+    performLanguageDetection(res, from, to, text);
+    // if necessary, will then checkIfExistsInDatabase,
+    // and then possibly queryYandexTranslateAPI.
+  } else { 
+    return res.send({ text: text }) 
+  }
+
 });
 
 module.exports = router;
